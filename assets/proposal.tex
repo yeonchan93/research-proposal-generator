@@ -1,0 +1,140 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage{kotex}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+\geometry{left=30mm,right=30mm,top=30mm,bottom=30mm}
+\setstretch{1.15}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{}
+\fancyhead[R]{\footnotesize \textbf{기계학습과정보이론 GEV6150 \\ 김연찬 2025451141}}
+\fancyfoot[C]{\thepage}
+
+\begin{document}
+
+\begin{center}
+    {\LARGE\bf 엔트로피 및 KL 발산 정규화를 적용한 \\ 대조 학습 기반 추천 시스템}\\[1em]
+\end{center}
+
+% \vspace{1em}
+
+\section*{연구과제의 필요성}
+
+추천 시스템은 현대 정보 환경에서 사용자 경험 향상에 있어 핵심적인 역할을 한다. 그러나 전통적인 협업 필터링 모델은 데이터 희소성, 인기도 편향(popularity bias)과 같은 한계에 직면한다. 특히, 이러한 한계는 추천의 다양성과 신뢰도를 저해하며, 긴 꼬리 아이템(long-tail items)의 추천에 있어 취약점을 드러낸다.
+
+최근 대조 학습(Contrastive Learning) 기반의 추천 기술들은 임베딩 정렬(alignment)과 균일화(uniformity)를 활용하여 표현의 분산도를 높이고, 인기도 편향을 최소화하여 성능 개선을 시도하고 있다. 예시로 SimGCL, SGL 등은 그래프 증강 및 노이즈 주입 방법을 활용한다. 그러나 기존 연구들은 주로 전체 임베딩 분포의 균일화에 집중할 뿐, 사용자별 선호 분포와 추천 결과 분포 사이의 불일치 문제(캘리브레이션)를 직접적으로 다루지 않았다.
+
+정보 이론적 관점에서도 추천 결과의 다양성과 정확성 간 균형이 중요하게 다루어지고 있다. 엔트로피(Shannon entropy)는 추천의 다양성을, KL 발산(Kullback–Leibler divergence)은 추천의 캘리브레이션(정합성)을 정량적으로 평가할 수 있는 척도이다. 하지만, 기존 연구는 이러한 정보 이론적 척도를 모델 학습의 명시적 정규화 항으로 효과적으로 활용하지 못하였다.
+
+따라서, 본 연구에서는 대조 학습 기반 추천 시스템에 엔트로피 및 KL 발산 정규화를 도입함으로써 사용자의 선호 분포를 반영한 맞춤형 추천과 다양한 추천 결과를 동시에 달성할 수 있는 새로운 접근이 필요하다.
+
+\section*{연구과제의 목표 및 내용}
+
+본 연구의 목표는 정보 이론적 정규화(엔트로피, KL 발산)와 대조 학습을 결합한 새로운 추천 시스템 프레임워크를 제안하고, 이론적 분석 및 실험을 통해 그 효과를 검증하는 것이다. 다음과 같은 구체적인 내용을 포함한다.
+
+\begin{enumerate}[label={\arabic*.}]
+    \item \textbf{새로운 문제 정의:} 사용자 $u$의 과거 상호작용에서 추정한 관심사 분포 $P_u$와 모델이 생성하는 추천 분포 $Q_u$ 간의 KL 발산 $D_{KL}(P_u \| Q_u)$를 최소화하고, 추천 분포의 엔트로피 $H(Q_u)$를 최대화하는 목적 함수를 설계한다.
+    \item \textbf{결합 손실 함수:} 
+    \[
+    L_{\mathrm{total}} = L_{\mathrm{CL}} + \alpha \sum_u D_{KL}(P_u \| Q_u) - \beta \sum_u H(Q_u),
+    \]
+    여기서 $L_{\mathrm{CL}}$은 대조 학습 손실, $\alpha$와 $\beta$는 하이퍼파라미터이다.
+    \item \textbf{모델 설계:} 사용자 임베딩 $\mathbf{z}_u$와 아이템 임베딩 $\mathbf{z}_i$를 InfoNCE 기반 대조 학습으로 학습하고, 추천 분포 $Q_u$를 모델이 생성하는 top-N 추천 결과에서 산출한다. KL 및 엔트로피 정규화 항을 포함하여 모델을 최적화한다.
+    \item \textbf{이론적 분석:} 정보 병목(Information Bottleneck) 관점에서 KL/엔트로피 항이 모델의 표현 특성과 일반화 성능에 미치는 영향을 분석한다.
+    \item \textbf{실험 평가:} MovieLens, Amazon, Yelp 등 데이터셋에서 제안법의 성능을 검증한다. 추천 정확도(Recall, NDCG), 다양성(Shannon 엔트로피, Gini 지수 등), 캘리브레이션(KL divergence) 지표를 평가한다.
+\end{enumerate}
+
+이상의 목표를 통해 추천 시스템 연구에 정량적 다양성과 맞춤형 정합을 동시 달성할 수 있는 새로운 패러다임을 제시한다.
+
+\section*{연구과제의 활용방안 및 기대효과}
+
+\begin{itemize}
+    \item \textbf{사용자 맞춤형 추천 다양성:} 엔트로피 정규화를 통해 보다 다양한 아이템 추천이 가능하며, 이는 긴 꼬리 아이템의 노출 증가 및 사용자 만족도 향상에 기여한다.
+    \item \textbf{추천 결과의 신뢰도 및 정합 향상:} KL 발산 최소화로 추천 분포가 각 사용자별 선호 분포와 정합되도록 하여, 개별 사용자의 특성이 반영된 맞춤형 추천이 가능하다.
+    \item \textbf{추천 시스템의 일반화 성능 향상:} 정보 이론 기반 정규화는 불필요한 정보의 억제 및 모델 과적합 방지를 통해 전반적인 일반화 성능을 높인다.
+    \item \textbf{실제 서비스 적용 가능성:} 공개 데이터셋에 기반한 실험적 검증과 함께, 도입이 용이한 손실 함수 구조는 다양한 온라인 서비스에 바로 활용 가능하다.
+    \item \textbf{학술 및 실무 기여:} 기존 대조 학습 기반 추천 연구 및 정보 이론적 접근의 한계를 뛰어넘어, 이론과 실무 모두에서 참신성을 인정받을 수 있는 방향을 제시한다.
+\end{itemize}
+
+본 연구 결과는 맞춤형 추천 다양성 향상이 중요한 미디어/이커머스/콘텐츠 서비스 등에 즉각적으로 활용될 수 있으며, 사용자 경험 차별화 및 플랫폼 경쟁력 강화에 기여할 것으로 기대된다.
+
+\section*{연구과제의 세부 내용 및 방법론}
+
+\paragraph{1. 학습 프레임워크}
+대조 학습 기반의 추천 모델에 정보 이론적 정규화 항을 결합한다. 각 사용자 $u$에 대해:
+
+\begin{itemize}
+    \item 사용자 임베딩 $\mathbf{z}_u$ 및 아이템 임베딩 $\mathbf{z}_i$를 구축
+    \item InfoNCE 기반의 대조 손실: 
+    \[
+    L_{\mathrm{CL}} = -\sum_{(u,i^+)} \log \frac{\exp(\mathbf{z}_u^\top \mathbf{z}_{i^+}/\tau)}{\sum_{j} \exp(\mathbf{z}_u^\top \mathbf{z}_j/\tau)}
+    \]
+    \item 추천 분포 $Q_u$: 상위 N개 추천 결과의 카테고리 분포 또는 전체 아이템에 대한 softmax 확률 분포로 계산
+    \item 관심사 분포 $P_u$: 사용자 과거 상호작용 기반 카테고리 히스토그램에서 정규화하여 산출
+    \item 결합 손실: $L_{\mathrm{total}}$을 미분하며 파라미터 갱신
+\end{itemize}
+
+\paragraph{2. 정보 이론적 정규화와 분석}
+\begin{itemize}
+    \item \textbf{KL 발산}: $D_{KL}(P_u\|Q_u) = \sum_{i} P_u(i)\log\frac{P_u(i)}{Q_u(i)}$로 계산
+    \item \textbf{엔트로피}: $H(Q_u) = -\sum_{i} Q_u(i)\log Q_u(i)$
+    \item \textbf{효과 분석}: 
+        \begin{itemize}
+            \item KL 항: 추천 결과의 캘리브레이션(선호 정합) 유도
+            \item 엔트로피 항: 추천 다양성/불확실성 증가 유도
+            \item 하이퍼파라미터 $\alpha,\beta$를 조절해 정확성/다양성 트레이드 오프
+        \end{itemize}
+\end{itemize}
+
+\paragraph{3. 실험 설계 및 성능 평가}
+\begin{itemize}
+    \item \textbf{벤치마크 데이터셋}: MovieLens, Amazon, Yelp 등
+    \item \textbf{비교 모델}: LightGCN, SGL, SimGCL 등
+    \item \textbf{평가지표}:
+        \begin{itemize}
+            \item 정확도: Recall@K, NDCG@K
+            \item 다양성: Shannon 엔트로피, Gini 지수
+            \item 캘리브레이션: 추천 결과 vs. 사용자 프로필 간 KL divergence
+        \end{itemize}
+    \item \textbf{군집/세그먼트별 성능 분석} 및 ablation study 수행
+\end{itemize}
+
+\newpage
+
+\section*{정보 이론적 관련성 및 기존 연구와의 차별성}
+
+\subsection*{1. 정보 이론적 척도의 역할}
+
+\paragraph{KL 발산 $D_{KL}(P_u \| Q_u)$}
+KL 발산은 두 확률분포 간의 차이를 계량화하는 대표적 정보 이론 척도이다. 본 연구에서는 사용자 선호 분포와 추천 분포 간 KL 발산을 명시적 손실 항에 포함함으로써, 추천 결과가 개별 사용자의 관심 특성에 더 잘 정합되도록 유도한다. 예를 들어, 영화 추천에서 사용자가 선호하는 장르 분포 $P_u$와 추천 리스트의 장르 분포 $Q_u$가 일치할 경우 KL 값이 최소가 되어, 추천 결과의 캘리브레이션(Calibration) 품질이 향상된다.
+
+\paragraph{Shannon 엔트로피 $H(Q_u)$}
+엔트로피는 추천 결과 분포의 불확실성과 다양성을 나타내는 척도이다. 엔트로피 최대화는 추천이 특정 아이템 혹은 카테고리에 치우치는 편중(recommendation overspecialization)을 방지하며, 다양한 아이템의 추천을 촉진한다. 엔트로피 항을 명시적으로 학습 목적에 포함하면, 임베딩 레벨의 표현 균일화 효과를 넘어서 실제 추천 결과의 분포 다양성이 실현된다.
+
+\subsection*{2. 기존 연구와의 차별성}
+
+기존의 대조 학습 기반 추천 연구 중 SGL, SimGCL 등의 기법은 노이즈 주입 혹은 그래프 증강을 통해 전체 임베딩 분포의 균일성만 조정하였다. 본 연구는 사용자의 개별적 프로필에 기반한 정합(정확성)과 엔트로피 기반 다양성이라는 두 축을 모두 손실 함수에 반영한 점에서 차별화된다.
+
+정보 병목(Information Bottleneck) 이론 및 IB 기반 그래프 대조 학습 연구(예: Wei et al., Yang et al.)는 특징 압축 및 표현 선택에 주로 초점을 맞추었으나, 추천 리스트의 최종 분포 조절까지 다루지는 않았다. 또한, 기존의 캘리브레이션 연구들은 평가 지표로써 KL divergence를 사용했을 뿐, 학습 손실 레벨에서 명시적으로 도입한 사례가 드물다.
+
+따라서 본 연구는 대조 학습+정보이론 정규화의 통합적 접근, 그리고 사용자별 분포 캘리브레이션과 추천 다양성간의 \textbf{정량적 trade-off}를 함께 실현하는 실질적 방법론을 제시함에 따라 기존 문헌에 대한 의미 있는 확장성과 차별점을 제공한다.
+
+\vspace{2em}
+\section*{참고문헌}
+\begin{enumerate}[label={[\arabic*]}]
+    \item Kleinberg, J. et al. (2023). \textit{Calibrated Recommendations for Users with Decaying Attention}. arXiv:2302.03239.
+    \item Wei, C. et al. (2022). \textit{Contrastive Graph Structure Learning via Information Bottleneck for Recommendation}. NeurIPS.
+    \item Yu, J. et al. (2023). \textit{XSimGCL: Extremely Simple Graph Contrastive Learning for Recommendation}. IEEE TKDE.
+    \item Bai, Y. et al. (2024). \textit{Blin: Multi-Task Sequence Recommendation Based on Bidirectional KL-Divergence}. Mathematics.
+    \item Chen, T. et al. (2024). \textit{Understanding and Generalizing InfoNCE-based Contrastive Learning}. arXiv:2402.10150.
+    \item Steck, H. (2018). \textit{Calibrated Recommendations}. RecSys.
+\end{enumerate}
+
+\end{document}

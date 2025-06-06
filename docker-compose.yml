@@ -1,0 +1,10 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: research-proposal-generator
+    volumes:
+      - ./:/app
+    tty: true
+    stdin_open: true
